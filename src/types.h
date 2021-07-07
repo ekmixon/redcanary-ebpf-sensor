@@ -69,6 +69,7 @@ typedef enum
     TE_CURRENT_WORKING_DIRECTORY,
     TE_FILE_INFO,
     TE_RETCODE,
+    TE_NETWORK, // Should this be split between protocols? IPv6/IPv4 or TCP vs UDP?
 } telemetry_event_type_t;
 
 #define COMMON_FIELDS \
@@ -167,7 +168,8 @@ typedef struct
     char value[384];
 } read_return_string_event_t;
 
-typedef struct {
+typedef struct
+{
     u64 inode;
     u32 devmajor;
     u32 devminor;
@@ -185,28 +187,84 @@ typedef struct
 
 } netconn_info_t;
 
-typedef struct 
+typedef struct
 {
     COMMON_FIELDS;
     u32 luid;
     u32 euid;
     u32 egid;
     char comm[16];
-    union {
+    union
+    {
         process_fork_info_t fork_info;
         netconn_info_t netconn_info;
     } u;
 } syscall_info_t, *psyscall_info_t;
+
+enum direction_t
+{
+    inbound,
+    outbound
+};
+
+struct process_data
+{
+    u32 pid;
+    char comm[TASK_COMM_LEN];
+};
+
+typedef struct
+{
+    u16 protocol_type;           // Something like IPPROTO_TCP or IPPROTO_UDP
+    u16 ip_type;                 // AF_INET or AF_INET6
+    enum direction_t direction;  // inbound or outbound
+    struct process_data process; // pid and comm string
+    // TODO: add activity_at field
+    union
+    {
+        struct
+        {
+            u16 dest_port;
+            u16 src_port;
+            struct sockaddr_in dest_addr;
+            struct sockaddr_in src_addr;
+        } tcpv4;
+        struct
+        {
+            u16 dest_port;
+            u16 src_port;
+            struct sockaddr_in6 dest_addr;
+            struct sockaddr_in6 src_addr;
+        } tcpv6;
+        struct
+        {
+            u16 dest_port;
+            u16 src_port;
+            struct sockaddr_in dest_addr;
+            struct sockaddr_in src_addr;
+        } udpv4;
+        struct
+        {
+            u16 dest_port;
+            u16 src_port;
+            struct sockaddr_in6 dest_addr;
+            struct sockaddr_in6 src_addr;
+        } udpv6;
+    } protos;
+} network_info_t, *pnetwork_info_t;
 
 typedef struct
 {
     u64 id;
     u32 done;
     telemetry_event_type_t telemetry_type;
-    union {
-        syscall_info_t syscall_info; 
+    union
+    {
+        syscall_info_t syscall_info;
         file_info_t file_info;
-        struct {
+        network_info_t network_info;
+        struct
+        {
             char value[VALUE_SIZE];
             char truncated;
         } v;
