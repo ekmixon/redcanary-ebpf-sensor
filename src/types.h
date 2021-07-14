@@ -2,12 +2,27 @@
 
 #pragma once
 
+//#include <uapi/linux/in.h>
 #include <linux/types.h>
 
 #define MAX_ADDRESSES 16
 #define TRUE 1
 #define FALSE 0
 #define VALUE_SIZE 128
+
+// Had to add these for some reason
+#define TASK_COMM_LEN 16
+typedef __u16 u16;
+
+#ifndef _UAPI_LINUX_IN6_H
+struct in6_addr {
+	union {
+		__u8		u6_addr8[16];
+		__be16		u6_addr16[8];
+		__be32		u6_addr32[4];
+	} in6_u;
+};
+#endif
 
 typedef enum
 {
@@ -204,7 +219,8 @@ typedef struct
 enum direction_t
 {
     inbound,
-    outbound
+    outbound,
+    nowhere
 };
 
 struct process_data
@@ -226,29 +242,29 @@ typedef struct
         {
             u16 dest_port;
             u16 src_port;
-            struct sockaddr_in dest_addr;
-            struct sockaddr_in src_addr;
+            __be32 dest_addr;
+            __be32 src_addr;
         } tcpv4;
         struct
         {
             u16 dest_port;
             u16 src_port;
-            struct sockaddr_in6 dest_addr;
-            struct sockaddr_in6 src_addr;
+            struct in6_addr dest_addr;
+            struct in6_addr src_addr;
         } tcpv6;
         struct
         {
             u16 dest_port;
             u16 src_port;
-            struct sockaddr_in dest_addr;
-            struct sockaddr_in src_addr;
+            __be32 dest_addr;
+            __be32 src_addr;
         } udpv4;
         struct
         {
             u16 dest_port;
             u16 src_port;
-            struct sockaddr_in6 dest_addr;
-            struct sockaddr_in6 src_addr;
+            struct in6_addr dest_addr;
+            struct in6_addr src_addr;
         } udpv6;
     } protos;
 } network_info_t, *pnetwork_info_t;
