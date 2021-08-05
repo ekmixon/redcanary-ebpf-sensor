@@ -1785,8 +1785,8 @@ int kretprobe__ret___skb_recv_udp(struct pt_regs *ctx)
     }
     else if (proto == 0x8) // ETH_P_IP
     {
-        struct iphdr *ip = (struct iphdr *)skb_head + network_header;
-        struct udphdr *udp = (struct udphdr *)skb_head + transport_header;
+        struct iphdr *ip = (struct iphdr *)(skb_head + network_header);
+        struct udphdr *udp = (struct udphdr *)(skb_head + transport_header);
         ev.u.network_info.ip_type = AF_INET;
         bpf_probe_read(&ev.u.network_info.protos.udpv4.dest_addr, sizeof(ev.u.network_info.protos.udpv4.dest_addr), (void *)(&ip->daddr));
         bpf_probe_read(&ev.u.network_info.protos.udpv4.src_addr, sizeof(ev.u.network_info.protos.udpv4.src_addr), (void *)(&ip->saddr));
