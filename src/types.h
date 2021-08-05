@@ -9,18 +9,21 @@
 #define TRUE 1
 #define FALSE 0
 #define VALUE_SIZE 128
+#define CRC64_LOADED 0xec6642829d632573 // CRC64 of "loaded"
 
 // Had to add these for some reason
 #define TASK_COMM_LEN 16
 typedef __u16 u16;
 
 #ifndef _UAPI_LINUX_IN6_H
-struct in6_addr {
-	union {
-		__u8		u6_addr8[16];
-		__be16		u6_addr16[8];
-		__be32		u6_addr32[4];
-	} in6_u;
+struct in6_addr
+{
+    union
+    {
+        __u8 u6_addr8[16];
+        __be16 u6_addr16[8];
+        __be32 u6_addr32[4];
+    } in6_u;
 };
 #endif
 
